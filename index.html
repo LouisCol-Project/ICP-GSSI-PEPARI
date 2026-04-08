@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Accueil – CIS Taverny</title>
+<link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<!-- Font Awesome Icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+<style>
+/* === RESET & BASE === */
+* { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI', sans-serif; }
+body { background:#fff3e0; color:#333; display:flex; flex-direction:column; min-height:100vh; }
+main { flex:1; max-width:600px; width:95%; margin:auto; padding:1rem 0; display:grid; gap:1rem; }
+
+/* === HEADER === */
+header { display:flex; align-items:center; justify-content:space-between; padding:1rem; background:#d32f2f; color:white; border-radius:0 0 15px 15px; box-shadow:0 4px 12px rgba(0,0,0,0.3);}
+header img { height:50px; border-radius:8px; border:2px solid #fff;}
+header h1 { flex:1; text-align:center; font-size:1.4rem; font-weight:700; letter-spacing:0.5px; }
+header #date { font-size:0.9rem; opacity:0.9; }
+
+/* === INPUT NOM === */
+#verificateur { width:100%; padding:0.6rem; border-radius:10px; border:1px solid #ccc; margin-bottom:0.8rem; font-weight:bold; text-transform:uppercase; font-size:0.95rem; }
+
+/* === BOUTONS PRINCIPAUX === */
+.evaluation-container { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.8rem; }
+.evaluation { padding:1rem; border-radius:12px; color:white; font-weight:bold; text-align:center; font-size:0.95rem; cursor:pointer; transition: transform 0.2s, filter 0.2s; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 8px rgba(0,0,0,0.2);}
+.evaluation i { font-size:1.6rem; margin-bottom:0.3rem; }
+.evaluation:hover { transform:translateY(-3px); filter:brightness(1.1); }
+.ICP { background:#e53935; }
+.GSSI { background:#fb8c00; }
+.PEPARI { background:#43a047; }
+.stat { background:#6d4c41; }
+
+/* === INFO APP === */
+.info-app { background:white; padding:0.7rem; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.08); font-size:0.7rem; }
+.info-app table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+.info-app th, .info-app td { padding:8px; border:1px solid #b39ddb; text-align:left; }
+.info-app th { background:#d1c4e9; }
+
+/* === MODAL ADMIN === */
+.modal-bg { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; animation: fadeIn 0.3s;}
+@keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+.modal-content { background:#fff; padding:20px; border-radius:14px; width:320px; max-width:90%; text-align:center; box-shadow:0 6px 20px rgba(0,0,0,0.3); animation: slideDown 0.3s;}
+@keyframes slideDown { from {transform: translateY(-30px); opacity:0;} to {transform: translateY(0); opacity:1;} }
+.modal-content h2 { margin-bottom:15px; font-size:1.3rem; color:#d32f2f; }
+.modal-content input { width:100%; padding:10px; margin:8px 0; border-radius:6px; border:1px solid #ccc; font-size:0.9rem; }
+.modal-content input[type=password] { letter-spacing:2px; }
+.modal-content button { background:#1976D2; color:white; border:none; padding:10px 16px; border-radius:6px; font-weight:bold; cursor:pointer; font-size:0.9rem; margin-top:10px; transition:0.3s;}
+.modal-content button:hover { background:#1565C0; transform:scale(1.05);}
+</style>
+</head>
+<body>
+
+<header>
+  <img src="images/logo.png" alt="Logo CIS Taverny">
+  <h1>ICP / GSSI / PEPARI</h1>
+  <div id="date"></div>
+</header>
+
+<script>
+document.getElementById('date').textContent = new Date().toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+</script>
+
+<main>
+
+<!-- Dashboard pages -->
+<div class="evaluation-container">
+  <div class="evaluation ICP" id="btn-icp" onclick="goToPage('ICP')" disabled>
+    <i class="fas fa-dumbbell"></i>ICP
+  </div>
+  <div class="evaluation GSSI" id="btn-gssi" onclick="goToPage('GSSI')" disabled>
+    <i class="fas fa-ruler-vertical"></i>GSSI
+  </div>
+  <div class="evaluation PEPARI" id="btn-pepari" onclick="goToPage('PEPARI')" disabled>
+    <i class="fas fa-exclamation-triangle"></i>PEPARI
+  </div>
+  <div class="evaluation stat" onclick="location.href='Historique.html'">
+    <i class="fas fa-history"></i>HISTORIQUE
+  </div>
+  <div class="evaluation stat" onclick="location.href='Utilisateur.html'">
+    <i class="fas fa-user"></i>GESTION UTILISATEURS
+  </div>
+</div>
+
+<!-- Infos App -->
+<div class="info-app">
+<h2>Informations sur l'application</h2>
+<table>
+<thead><tr><th>Section</th><th>Détails</th></tr></thead>
+<tbody>
+<tr><td>Version</td><td>1.0 – Avril 2026</td></tr>
+<tr><td>Usage</td><td>Renseignement des ICP-GSSI-PEPARI</td></tr>
+<tr><td>Contact</td><td>CIS Taverny – SGT COLIN Louis et CPL SKIRLO Florent</td></tr>
+</tbody>
+</table>
+</div>
+
+</main>
+
+<footer style="text-align:center; padding:0.8rem; font-size:0.9rem; background:#d32f2f; color:white;">CIS Taverny – ICP / GSSI / PEPARI</footer>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
+
+<script>
+// Firebase config
+const firebaseConfig = {
+  apiKey:"AIzaSyD14dNcDQWq4SygSlo8YC8bJWisLYOh0Es",
+  authDomain:"veriftav.firebaseapp.com",
+  projectId:"veriftav",
+  storageBucket:"veriftav.firebasestorage.app",
+  messagingSenderId:"401217101102",
+  appId:"1:401217101102:web:dd375734d4f0464c146ebf",
+  measurementId:"G-KVSC8V8M1B"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// Redirection pages
+function goToPage(type){
+    const pages = {
+    ICP:'ICP.html',
+    GSSI:'GSSI.html',
+    PEPARI:'PEPARI.html'
+  };
+  location.href = pages[type];
+}
+</script>
+
+</body>
+</html>
