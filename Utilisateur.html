@@ -4,180 +4,401 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Gestion Utilisateurs – CIS Taverny</title>
-<link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+<link rel="shortcut icon" href="images/logo.png">
 
 <style>
-/* === RESET & BASE === */
-* { box-sizing:border-box; margin:0; padding:0; font-family:'Segoe UI', sans-serif; }
-body { background:#f0f0f0; color:#333; display:flex; flex-direction:column; min-height:100vh; scroll-behavior:smooth; }
 
-/* === HEADER === */
-header {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:1rem 2rem;
-  background:#d32f2f; color:white;
-  border-radius:0 0 15px 15px;
-  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+/* ===== BASE ===== */
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:"Segoe UI", sans-serif;
 }
-header img { height:50px; border-radius:8px; border:2px solid #fff; }
-header h1 { flex:1; text-align:center; font-size:1.6rem; font-weight:700; letter-spacing:1px; }
-header #date { font-size:0.95rem; opacity:0.9; }
 
-/* === FORMULAIRE === */
-.container {
-  width:95%; max-width:600px; margin:2rem auto;
-  background:#fff; padding:2rem; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.1);
+body{
+  background:linear-gradient(135deg,#f4f6f9,#eef2f7);
+  min-height:100vh;
 }
-.container h2 { text-align:center; margin-bottom:1.5rem; color:#1976D2; }
 
-form { display:flex; flex-direction:column; gap:1rem; }
-form label { font-weight:bold; }
-form input { padding:0.6rem; border:1px solid #ccc; border-radius:6px; font-size:1rem; }
-form input:focus { outline:none; border-color:#1976D2; box-shadow:0 0 5px rgba(25,118,210,0.5); }
-
-/* === BOUTONS === */
-.button-group { display:flex; justify-content:space-between; flex-wrap:wrap; gap:1rem; margin-top:1rem; }
-button {
-  flex:1; min-width:120px; padding:0.7rem; font-weight:bold; font-size:1rem;
-  border:none; border-radius:8px; cursor:pointer; transition:0.3s; box-shadow:0 3px 6px rgba(0,0,0,0.2);
+/* ===== HEADER ===== */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 20px;
+  background:linear-gradient(135deg,#d32f2f,#b71c1c);
+  color:white;
 }
-button:hover { opacity:0.9; transform:translateY(-1px); }
-.btn-add { background:#1976D2; color:white; }
-.btn-update { background:#0288D1; color:white; }
-.btn-delete { background:#D32F2F; color:white; }
-.btn-back { background:#f57c00; color:white; }
 
-/* === LISTE UTILISATEURS === */
-#user-list {
-  margin-top:2rem;
+header img{
+  height:45px;
+  background:white;
+  padding:4px;
+  border-radius:8px;
+}
+
+#date{
+  font-size:0.85rem;
+  opacity:0.9;
+}
+
+/* ===== LAYOUT ===== */
+.container{
+  width:95%;
+  max-width:1000px;
+  margin:20px auto;
+  display:grid;
+  gap:15px;
+}
+
+/* ===== STATS ===== */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
+.card{
+  background:white;
+  padding:12px;
+  border-radius:12px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.08);
+  text-align:center;
+  font-weight:600;
+}
+
+.card span{
+  display:block;
+  font-size:1.3rem;
+  margin-top:5px;
+  color:#1976d2;
+}
+
+/* ===== PANEL ===== */
+.panel{
+  background:white;
+  padding:15px;
+  border-radius:14px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* ===== FORM ===== */
+form{
+  display:grid;
+  gap:10px;
+}
+
+input, select{
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  outline:none;
+}
+
+input:focus, select:focus{
+  border-color:#1976d2;
+  box-shadow:0 0 6px rgba(25,118,210,0.3);
+}
+
+/* ===== BUTTONS ===== */
+.buttons{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+button{
+  flex:1;
+  min-width:120px;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+button:hover{ transform:translateY(-2px); }
+
+.add{background:#1976d2;color:white;}
+.update{background:#0288d1;color:white;}
+.delete{background:#d32f2f;color:white;}
+.back{background:#555;color:white;}
+
+/* ===== SEARCH + FILTER ===== */
+.tools{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:10px;
+}
+
+.tools input, .tools select{
+  flex:1;
+}
+
+/* ===== TABLE ===== */
+table{
   width:100%;
   border-collapse:collapse;
+  border-radius:12px;
+  overflow:hidden;
 }
-#user-list th, #user-list td {
-  padding:10px; border:1px solid #ccc; font-size:0.95rem;
+
+thead th{
+  background:#1976d2;
+  color:white;
+  padding:10px;
+  font-size:0.9rem;
+}
+
+td{
   text-align:center;
+  padding:10px;
+  border-bottom:1px solid #eee;
 }
-#user-list th { background:#1976D2; color:white; font-weight:bold; }
-#user-list tbody tr:nth-child(even) { background:#f9f9f9; }
-#user-list tbody tr:hover { background:#e3f2fd; cursor:pointer; }
+
+tr:hover{
+  background:#f1f7ff;
+  cursor:pointer;
+}
+
+/* ===== BADGES ===== */
+.badge{
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:0.75rem;
+  font-weight:600;
+}
+
+.homme{background:#e3f2fd;color:#1976d2;}
+.femme{background:#fce4ec;color:#d81b60;}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  background:#323232;
+  color:white;
+  padding:10px 14px;
+  border-radius:10px;
+  opacity:0;
+  transform:translateY(20px);
+  transition:0.3s;
+}
+
+.toast.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
 </style>
 </head>
+
 <body>
 
 <header>
-  <img src="images/logo.png" alt="Logo CIS Taverny">
+  <img src="images/logo.png">
   <h1>Gestion Utilisateurs</h1>
   <div id="date"></div>
 </header>
 
 <div class="container">
-  <h2>Ajouter / Modifier / Supprimer Utilisateur</h2>
-  <form id="user-form">
-    <label for="nom">Nom (MAJUSCULE)</label>
-    <input type="text" id="nom" required placeholder="Ex: ABATI">
 
-    <label for="dateDeNaissance">Date de naissance</label>
-    <input type="date" id="dateDeNaissance" required>
-
-    <div class="button-group">
-      <button type="submit" class="btn-add">➕ Ajouter</button>
-      <button type="button" class="btn-update">✏️ Actualiser</button>
-      <button type="button" class="btn-delete">🗑️ Supprimer</button>
-      <button type="button" class="btn-back" onclick="window.location.href='index.html'">⬅ Retour</button>
-    </div>
-  </form>
-
-  <table id="user-list">
-    <thead>
-      <tr>
-        <th>Nom</th>
-        <th>Date de naissance</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+<!-- ===== STATS ===== -->
+<div class="stats">
+  <div class="card">Total<span id="total">0</span></div>
+  <div class="card">Hommes<span id="hommes">0</span></div>
+  <div class="card">Femmes<span id="femmes">0</span></div>
 </div>
 
+<!-- ===== FORM ===== -->
+<div class="panel">
+
+<form id="form">
+
+  <input id="nom" placeholder="Nom (ex: ABATI)">
+  <input type="date" id="dob">
+
+  <select id="sexe">
+    <option value="">Sexe</option>
+    <option value="HOMME">Homme</option>
+    <option value="FEMME">Femme</option>
+  </select>
+
+  <div class="buttons">
+    <button class="add" type="submit">Ajouter</button>
+    <button class="update" type="button" id="update">Modifier</button>
+    <button class="delete" type="button" id="delete">Supprimer</button>
+    <button class="back" type="button" onclick="location.href='index.html'">Retour</button>
+  </div>
+
+</form>
+
+<!-- ===== TOOLS ===== -->
+<div class="tools">
+  <input id="search" placeholder="🔎 Rechercher...">
+  <select id="filter">
+    <option value="ALL">Tous</option>
+    <option value="HOMME">Hommes</option>
+    <option value="FEMME">Femmes</option>
+  </select>
+</div>
+
+<!-- ===== TABLE ===== -->
+<table>
+<thead>
+<tr>
+  <th>Nom</th>
+  <th>Date</th>
+  <th>Sexe</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc, doc, setDoc, deleteDoc, query, orderBy, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { 
+initializeApp 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { 
+getFirestore, collection, getDocs, addDoc, doc, setDoc, deleteDoc, query, orderBy 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDO_a2albfrFLjl5m2jjEWfcuFsRFhzFek",
   authDomain: "icp-gssi-pepari.firebaseapp.com",
-  projectId: "icp-gssi-pepari",
-  storageBucket: "icp-gssi-pepari.firebasestorage.app",
-  messagingSenderId: "744812768446",
-  appId: "1:744812768446:web:737f2971af7b24987842ef"
+  projectId: "icp-gssi-pepari"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const col = collection(db,"utilisateurs");
 
-const form = document.getElementById('user-form');
-const nomInput = document.getElementById('nom');
-const dobInput = document.getElementById('dateDeNaissance');
-const tbody = document.querySelector('#user-list tbody');
+const tbody = document.getElementById("tbody");
 
-async function loadUsers() {
+const form = document.getElementById("form");
+const nom = document.getElementById("nom");
+const dob = document.getElementById("dob");
+const sexe = document.getElementById("sexe");
+
+const search = document.getElementById("search");
+const filter = document.getElementById("filter");
+
+const total = document.getElementById("total");
+const hommes = document.getElementById("hommes");
+const femmes = document.getElementById("femmes");
+
+let users = [];
+let selected = null;
+
+/* ===== LOAD ===== */
+async function load(){
+  const snap = await getDocs(query(col, orderBy("nom")));
+
+  users = [];
+
+  snap.forEach(d=>{
+    users.push({id:d.id, ...d.data()});
+  });
+
+  render();
+  stats();
+}
+
+/* ===== RENDER ===== */
+function render(){
+
+  const s = search.value.toLowerCase();
+  const f = filter.value;
+
   tbody.innerHTML = "";
-  const snapshot = await getDocs(query(collection(db,"utilisateurs"), orderBy("nom")));
-  snapshot.forEach(docu => {
-    const data = docu.data();
+
+  users
+  .filter(u => u.nom.toLowerCase().includes(s))
+  .filter(u => f === "ALL" ? true : u.sexe === f)
+  .forEach(u => {
+
     const tr = document.createElement("tr");
-    tr.dataset.id = docu.id;
-    tr.innerHTML = `<td>${data.nom}</td><td>${data.dateDeNaissance}</td>`;
-    tr.addEventListener('click', () => {
-      nomInput.value = data.nom;
-      dobInput.value = data.dateDeNaissance;
-    });
+
+    tr.innerHTML = `
+      <td>${u.nom}</td>
+      <td>${u.dateDeNaissance}</td>
+      <td>${u.sexe}</td>
+    `;
+
+    tr.onclick = () => {
+      selected = u;
+      nom.value = u.nom;
+      dob.value = u.dateDeNaissance;
+      sexe.value = u.sexe;
+    };
+
     tbody.appendChild(tr);
   });
 }
 
-// Ajouter utilisateur
-form.addEventListener('submit', async (e) => {
+/* ===== STATS ===== */
+function stats(){
+  total.textContent = users.length;
+  hommes.textContent = users.filter(u=>u.sexe==="HOMME").length;
+  femmes.textContent = users.filter(u=>u.sexe==="FEMME").length;
+}
+
+/* ===== ADD ===== */
+form.onsubmit = async(e)=>{
   e.preventDefault();
-  const nom = nomInput.value.trim().toUpperCase();
-  const dateDeNaissance = dobInput.value;
-  if(!nom || !dateDeNaissance) return alert("Remplissez tous les champs !");
-  await addDoc(collection(db,"utilisateurs"), { nom, dateDeNaissance });
-  loadUsers();
-  form.reset();
-});
 
-// Actualiser utilisateur
-document.querySelector('.btn-update').addEventListener('click', async () => {
-  const nom = nomInput.value.trim().toUpperCase();
-  const dateDeNaissance = dobInput.value;
-  if(!nom || !dateDeNaissance) return alert("Remplissez tous les champs !");
-  
-  const q = query(collection(db,"utilisateurs"), where("nom","==",nom));
-  const snapshot = await getDocs(q);
-  if(snapshot.empty) return alert("Utilisateur non trouvé !");
-  const docId = snapshot.docs[0].id;
-  await setDoc(doc(db,"utilisateurs",docId), { nom, dateDeNaissance });
-  loadUsers();
-  form.reset();
-});
+  await addDoc(col,{
+    nom: nom.value.toUpperCase(),
+    dateDeNaissance: dob.value,
+    sexe: sexe.value
+  });
 
-// Supprimer utilisateur
-document.querySelector('.btn-delete').addEventListener('click', async () => {
-  const nom = nomInput.value.trim().toUpperCase();
-  if(!nom) return alert("Entrez le nom de l'utilisateur à supprimer !");
-  
-  const q = query(collection(db,"utilisateurs"), where("nom","==",nom));
-  const snapshot = await getDocs(q);
-  if(snapshot.empty) return alert("Utilisateur non trouvé !");
-  const docId = snapshot.docs[0].id;
-  await deleteDoc(doc(db,"utilisateurs",docId));
-  loadUsers();
   form.reset();
-});
+  load();
+};
 
-// Affichage date et chargement initial
-document.getElementById('date').textContent = new Date().toLocaleDateString('fr-FR');
-loadUsers();
+/* ===== UPDATE ===== */
+document.getElementById("update").onclick = async()=>{
+  if(!selected) return alert("Sélectionne un utilisateur");
+
+  await setDoc(doc(db,"utilisateurs",selected.id),{
+    nom: nom.value.toUpperCase(),
+    dateDeNaissance: dob.value,
+    sexe: sexe.value
+  });
+
+  form.reset();
+  load();
+};
+
+/* ===== DELETE ===== */
+document.getElementById("delete").onclick = async()=>{
+  if(!selected) return alert("Sélectionne un utilisateur");
+
+  await deleteDoc(doc(db,"utilisateurs",selected.id));
+
+  form.reset();
+  load();
+};
+
+/* ===== EVENTS ===== */
+search.oninput = render;
+filter.onchange = render;
+
+/* ===== INIT ===== */
+load();
+
 </script>
 
 </body>
