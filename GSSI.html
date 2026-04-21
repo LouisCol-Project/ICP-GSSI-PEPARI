@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ICP – CIS Taverny</title>
+<title>GSSI – CIS Taverny</title>
 <link rel="shortcut icon" href="images/logo.png">
 
 <style>
@@ -192,7 +192,7 @@ input:focus{
 
 <header>
   <img src="images/logo.png">
-  <h1>ICP</h1>
+  <h1>GSSI</h1>
   <div id="date"></div>
 </header>
 
@@ -203,37 +203,33 @@ new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'
 
 <div class="container">
 
-  <div class="controls">
-    <label>EAP :</label>
-    <select id="EAP-select">
-      <option value="">Sélectionnez</option>
-      <option>ADC BERNARD</option>
-      <option>ADC CRETIN</option>
-      <option>ADC VITTET</option>
-      <option>ADJ THIBAULT</option>
-      <option>ADC LAMART</option>
-      <option>SCH BONY</option>
-      <option>CCH REBIERRE</option>
-      <option>CPL SKIRLO</option>
-    </select>
+<div class="controls">
+  <select id="EAP-select">
+    <option value="">SOG</option>
+    <option>ADC BERNARD</option>
+	<option>ADC COHEN</option>
+    <option>ADC CRETIN</option>
+    <option>ADC DETAILLE</option>
+    <option>ADC DOTT</option>
+    <option>ADC FOUQUIER</option>
+    <option>ADC GARNIER</option>
+    <option>ADC GAUDET</option>
+    <option>ADC POUSSIN</option>
+    <option>ADC TRAVERT</option>
+    <option>ADC VITTET</option>
+  </select>
 
-    <label>Agents :</label>
-    <input type="number" id="nombre" min="1" max="12">
+  <input type="number" id="nombre" placeholder="Nb agents">
 
-    <button class="primary" onclick="genererTableau()">Générer</button>
-  </div>
-
-  <div id="tableau-container"></div>
-
-  <div id="send-button">
-    <button class="primary" onclick="envoyerICP()">Envoyer ICP</button>
-    <button class="back" onclick="window.location.href='index.html'">Retour</button>
-  </div>
-
+  <button class="primary" onclick="genererTableau()">Générer</button>
 </div>
 
-</body>
-</html>
+<div id="tableau"></div>
+
+<br>
+<button class="primary" onclick="envoyer()">Envoyer ICP</button>
+
+</div>
 
 <!-- 🔥 FIREBASE -->
 <script type="module">
@@ -257,91 +253,98 @@ window.addDoc = addDoc;
 window.collection = collection;
 </script>
 
-<!-- 🔥 SCRIPT PRINCIPAL -->
 <script>
-// Date
 document.getElementById('date').textContent =
-  new Date().toLocaleDateString('fr-FR', {
-    weekday:'long', day:'numeric', month:'long', year:'numeric'
-  });
+new Date().toLocaleDateString('fr-FR');
 
-// Colonnes
-const colonnes = ["NOM","LUC-LEGER","POMPES","TRACTIONS","GAINAGE","KILLY","SOUPLESSE"];
+const colonnes = [
+"NOM",
+"ARI + Ventilateurs",
+"CUO Ventilation",
+"Echelles",
+"Sauvetage extérieur"
+];
 
-// Génération tableau
-function genererTableau() {
-  const container = document.getElementById('tableau-container');
-  const eap = document.getElementById('EAP-select').value;
-  const nombre = parseInt(document.getElementById('nombre').value);
+function genererTableau(){
+  const nb = document.getElementById('nombre').value;
+  if(!nb) return alert("Nombre invalide");
 
-  if(!eap) return alert("Sélectionne un EAP");
-  if(!nombre) return alert("Nombre invalide");
+  let html = "<table><thead><tr>";
+  colonnes.forEach(c=> html+=`<th>${c}</th>`);
+  html+="<th>Progression</th></tr></thead><tbody>";
 
-  let html = '<table><thead><tr>';
-  colonnes.forEach(c => html += `<th>${c}</th>`);
-  html += '</tr></thead><tbody>';
+  for(let i=0;i<nb;i++){
+    html+="<tr>";
+html+=`<td><input type="text" oninput="this.value=this.value.toUpperCase()"></td>`;
 
-  for(let i=0;i<nombre;i++){
-    html += '<tr>';
-    html += `<td><input type="text" oninput="this.value=this.value.toUpperCase()"></td>`;
     for(let j=1;j<colonnes.length;j++){
-      html += `<td><input type="number"></td>`;
+      html+=`<td><input type="checkbox" onchange="updateProgress(this)"></td>`;
     }
-    html += '</tr>';
+
+    html+=`
+    <td>
+      <div class="progress">
+        <div class="progress-bar"></div>
+      </div>
+    </td>`;
+
+    html+="</tr>";
   }
 
-  html += '</tbody></table>';
-  container.innerHTML = html;
+  html+="</tbody></table>";
+  document.getElementById('tableau').innerHTML = html;
 }
 
-// 🔥 ENVOI FIREBASE
-async function envoyerICP() {
-  const tableau = document.querySelector('#tableau-container table');
-  if(!tableau) return alert("Génère le tableau");
+function updateProgress(el){
+  const row = el.closest("tr");
+  const checks = row.querySelectorAll('input[type="checkbox"]');
+  const bar = row.querySelector('.progress-bar');
 
-  const eap = document.getElementById('EAP-select').value;
-  const rows = tableau.querySelectorAll('tbody tr');
+  let total = checks.length;
+  let checked = 0;
+
+  checks.forEach(c=>{ if(c.checked) checked++; });
+
+  let percent = (checked/total)*100;
+  bar.style.width = percent+"%";
+}
+
+async function envoyer(){
+  const table = document.querySelector("table");
+  if(!table) return alert("Génère le tableau");
+
+  const rows = table.querySelectorAll("tbody tr");
+  const eap = document.getElementById("EAP-select").value;
 
   let data = [];
-  let valid = true;
 
-  rows.forEach(r => {
+  rows.forEach(r=>{
+    const inputs = r.querySelectorAll("input");
     let agent = {};
-    const inputs = r.querySelectorAll('input');
 
-    inputs.forEach((input, i) => {
-      let val = input.value.trim();
+    agent["NOM"] = inputs[0].value.toUpperCase();
 
-      if(i === 0 && val === "") valid = false;
-      if(i > 0 && val === "") valid = false;
-
-      agent[colonnes[i]] = i === 0 ? val : Number(val);
-    });
+    for(let i=1;i<colonnes.length;i++){
+      agent[colonnes[i]] = inputs[i].checked;
+    }
 
     data.push(agent);
   });
 
-  if(!valid) return alert("Remplis tous les champs");
-
   try {
-    await window.addDoc(window.collection(window.db, "ICP"), {
-      eap: eap,
-      date: new Date().toISOString(),
-      agents: data
+    await window.addDoc(window.collection(window.db,"GSSI"),{
+      eap:eap,
+      date:new Date().toISOString(),
+      agents:data
     });
 
-    console.log(data);
-
-    // Reset
-    document.getElementById('tableau-container').innerHTML = "";
-    document.getElementById('nombre').value = "";
 
     // 🔥 REDIRECTION ICI
     window.location.href = "index.html";
 
   } catch (e) {
     console.error(e);
-    alert("Erreur Firebase");
+    alert("Erreur envoi ❌");
   }
 }
 </script>

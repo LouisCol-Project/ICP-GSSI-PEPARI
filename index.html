@@ -240,9 +240,19 @@ new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'
     <span>PEPARI</span>
   </div>
 
-  <div class="evaluation stat" onclick="ouvrirLogin('HISTO')">
+  <div class="evaluation stat" onclick="ouvrirLogin('HISTOICP')">
     <i class="fas fa-history"></i>
-    <span>Historique</span>
+    <span>Historique ICP</span>
+  </div>
+  
+  <div class="evaluation stat" onclick="ouvrirLogin('HISTOGSSI')">
+    <i class="fas fa-history"></i>
+    <span>Historique GSSI</span>
+  </div>
+  
+  <div class="evaluation stat" onclick="ouvrirLogin('HISTOPEPARI')">
+    <i class="fas fa-history"></i>
+    <span>Historique PEPARI</span>
   </div>
 
   <div class="evaluation stat" onclick="ouvrirLogin('USERS')">
@@ -299,7 +309,10 @@ const ACCESS = {
   ICP:    { user: "EAPTav95", pass: "SDIS95ICP", page: "ICP.html" },
   GSSI:   { user: "SOGTav95", pass: "GSSI95", page: "GSSI.html" },
   PEPARI: { user: "SOGTav95", pass: "PEPARI95", page: "PEPARI.html" },
-  HISTO:  { user: "ICPTav95", pass: "SDIS95.ICP", page: "Historique.html" },
+  HISTOICP:  { user: "ICPTav95", pass: "SDIS95.ICP", page: "HistoriqueICP.html" },
+  HISTOGSSI:  { user: "GSSITav95", pass: "SDIS95.ICP", page: "HistoriqueGSSI.html" },
+  HISTOPEPARI:  { user: "PEPARITav95", pass: "SDIS95.ICP", page: "HistoriquePEPARI.html" },
+
   USERS:  { user: "AdminUsers", pass: "SDIS95Taverny.", page: "Utilisateur.html" }
 };
 

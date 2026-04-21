@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historique GSSI</title>
+<link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
+
+<style>
+
+body {
+  font-family: Segoe UI, sans-serif;
+  background: #eef2f7;
+  margin: 0;
+  color: #1f2937;
+}
+
+/* ================= HEADER ================= */
+
+header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:1rem 2rem;
+  background:#b91c1c;
+  color:white;
+}
+
+header img {
+  height:45px;
+  border-radius:8px;
+  border:2px solid white;
+}
+
+header h1 {
+  flex:1;
+  text-align:center;
+}
+
+/* ================= FILTERS ================= */
+
+.filters {
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin:15px;
+}
+
+.filters input, .filters select {
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ddd;
+  width:200px;
+}
+
+/* ================= GRAPH ================= */
+
+#graph {
+  width:95%;
+  margin:15px auto;
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.bar {
+  margin:6px 0;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.bar span {
+  width:180px;
+}
+
+.bar div {
+  height:18px;
+  background:#2563eb;
+  border-radius:6px;
+}
+
+/* ================= TABLE ================= */
+
+#app {
+  width:95%;
+  margin:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  margin-top:15px;
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 5px 18px rgba(0,0,0,0.08);
+}
+
+th {
+  background:#1d4ed8;
+  color:white;
+  padding:12px;
+}
+
+td {
+  padding:12px;
+  text-align:center;
+}
+
+/* ================= COLORS ================= */
+
+.row-ok {
+  background:#01FF00;
+}
+
+.row-bad {
+  background:#FF9E07;
+}
+
+.ok {
+  color:#12AD1C;
+  font-weight:700;
+}
+
+.no {
+  color:#FF262A;
+  font-weight:700;
+}
+
+.small {
+  font-size:11px;
+  color:#374151;
+  white-space:pre-line;
+}
+
+td:first-child {
+  font-weight:700;
+  background:#f8fafc;
+}
+
+/* ===================== 🔥 BUTTONS UPGRADED ===================== */
+
+.controls {
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin:10px 0 5px;
+}
+
+/* base button */
+button {
+  border:none;
+  padding:10px 18px;
+  border-radius:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.25s ease;
+  box-shadow:0 4px 10px rgba(0,0,0,0.15);
+}
+
+/* 🔄 refresh button */
+.btn-refresh {
+  background: linear-gradient(135deg,#2563eb,#1d4ed8);
+  color:white;
+}
+
+.btn-refresh:hover {
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(37,99,235,0.35);
+}
+
+/* ⬅ back button */
+.btn-back {
+  background: linear-gradient(135deg,#FF7F27,#ff6a00);
+  color:white;
+}
+
+.btn-back:hover {
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(255,127,39,0.35);
+}
+
+/* click effect */
+button:active {
+  transform:scale(0.97);
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="images/logo.png">
+  <h1>Historique GSSI</h1>
+  <div id="date"></div>
+</header>
+
+<!-- FILTERS -->
+<div class="filters">
+
+  <!-- AGENT AUTOCOMPLETE -->
+  <input id="searchAgent" list="agentsList" placeholder="🔎 Agent">
+  <datalist id="agentsList"></datalist>
+
+  <!-- EAP LIST -->
+  <select id="searchEap">
+    <option value="">-- Tous les SOG --</option>
+    <option>ADC BERNARD</option>
+    <option>ADC COHEN</option>
+    <option>ADC CRETIN</option>
+    <option>ADC DETAILLE</option>
+    <option>ADC DOTT</option>
+    <option>ADC FOUQUIER</option>
+    <option>ADC GARNIER</option>
+    <option>ADC GAUDET</option>
+    <option>ADC POUSSIN</option>
+    <option>ADC TRAVERT</option>
+    <option>ADC VITTET</option>
+  </select>
+
+  <!-- DATE -->
+  <input type="date" id="searchDate">
+
+</div>
+
+<div class="controls">
+  <button class="btn-back" onclick="window.location.href='index.html'">⬅ Retour au menu</button>
+</div>
+
+
+<!-- GRAPH -->
+<div id="graph"></div>
+
+<!-- TABLE -->
+<div id="app"></div>
+
+<script type="module">
+
+document.getElementById('date').textContent =
+  new Date().toLocaleDateString('fr-FR', {
+    weekday:'long', day:'numeric', month:'long', year:'numeric'
+  });
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyDO_a2albfrFLjl5m2jjEWfcuFsRFhzFek",
+  authDomain: "icp-gssi-pepari.firebaseapp.com",
+  projectId: "icp-gssi-pepari"
+});
+
+const db = getFirestore(app);
+
+let data = {};
+let statsEap = {};
+let allAgents = new Set();
+
+/* ================= LOAD ================= */
+
+async function load(){
+
+  const snap = await getDocs(collection(db,"GSSI"));
+
+  data = {};
+  statsEap = {};
+  allAgents.clear();
+
+  snap.forEach(doc => {
+
+    const d = doc.data();
+    const eap = d.eap ?? "—";
+    const date = d.date ? new Date(d.date) : null;
+
+    if(!statsEap[eap]) statsEap[eap] = 0;
+
+    (d.agents ?? []).forEach(a => {
+
+      const nom = a.NOM;
+      if(!nom) return;
+
+      allAgents.add(nom);
+
+      if(!data[nom]){
+        data[nom] = {ARI:[],CUO:[],ECO:[],SAU:[]};
+      }
+
+      const push = (k,v)=>{
+        if(v){
+          data[nom][k].push({eap,date});
+          statsEap[eap]++;
+        }
+      };
+
+      push("ARI",a["ARI + Ventilateurs"]);
+      push("CUO",a["CUO Ventilation"]);
+      push("ECO",a["Echelles"]??a["Échelles"]);
+      push("SAU",a["Sauvetage extérieur"]);
+
+    });
+
+  });
+
+  fillAgentList();
+  renderGraph();
+  renderTable();
+}
+
+/* ================= AUTOCOMPLETE ================= */
+
+function fillAgentList(){
+  const list = document.getElementById("agentsList");
+  list.innerHTML = "";
+
+  [...allAgents].sort().forEach(a=>{
+    const opt = document.createElement("option");
+    opt.value = a;
+    list.appendChild(opt);
+  });
+}
+
+/* ================= GRAPH ================= */
+
+function renderGraph(){
+
+  const max = Math.max(...Object.values(statsEap),1);
+
+  let html = `<h3 style="text-align:center">Activité SOG</h3>`;
+
+  Object.entries(statsEap).forEach(([eap,val])=>{
+
+    const w = (val/max)*100;
+
+    html += `
+      <div class="bar">
+        <span>${eap}</span>
+        <div style="width:${w}%"></div>
+        <span>${val}</span>
+      </div>
+    `;
+  });
+
+  document.getElementById("graph").innerHTML = html;
+}
+
+/* ================= CELL ================= */
+
+function cell(list){
+
+  if(!list.length){
+    return `<div class="no">✖</div>`;
+  }
+
+  return `
+    <div class="ok">✔</div>
+    <div class="small">
+      ${list.map(x =>
+        `${x.eap} (${x.date ? x.date.toLocaleDateString("fr-FR") : "—"})`
+      ).join("\n")}
+    </div>
+  `;
+}
+
+/* ================= FILTER ================= */
+
+function matchFilters(nom){
+
+  const agent = document.getElementById("searchAgent").value.toLowerCase();
+  const eap = document.getElementById("searchEap").value;
+  const date = document.getElementById("searchDate").value;
+
+  if(agent && !nom.toLowerCase().includes(agent)) return false;
+
+  const entry = data[nom];
+
+  if(eap || date){
+
+    const ok = Object.values(entry).some(list =>
+      list.some(x=>{
+
+        const mEap = eap ? x.eap === eap : true;
+        const mDate = date ? (x.date && x.date.toISOString().split("T")[0] === date) : true;
+
+        return mEap && mDate;
+      })
+    );
+
+    return ok;
+  }
+
+  return true;
+}
+
+/* ================= TABLE ================= */
+
+function renderTable(){
+
+  let html = `
+  <table>
+    <tr>
+      <th>Nom</th>
+      <th>ARI</th>
+      <th>CUO</th>
+      <th>Échelles</th>
+      <th>Sauvetage</th>
+    </tr>
+  `;
+
+  Object.entries(data).forEach(([nom,a])=>{
+
+    if(!matchFilters(nom)) return;
+
+    const ok = a.ARI.length && a.CUO.length && a.ECO.length && a.SAU.length;
+
+    html += `
+      <tr class="${ok?'row-ok':'row-bad'}">
+        <td>${nom}</td>
+        <td>${cell(a.ARI)}</td>
+        <td>${cell(a.CUO)}</td>
+        <td>${cell(a.ECO)}</td>
+        <td>${cell(a.SAU)}</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+
+  document.getElementById("app").innerHTML = html;
+}
+
+/* ================= EVENTS ================= */
+
+document.querySelectorAll("input, select").forEach(i=>{
+  i.addEventListener("input", renderTable);
+  i.addEventListener("change", renderTable);
+});
+
+window.load = load;
+load();
+
+</script>
+
+</body>
+</html>
